@@ -20,21 +20,15 @@ function Preferences() {
   const [Location, setLocation] = useState('');
   const [Cuisines] = useState([]);
   const [Coordinates, setCoordinates] = useState({lat: null, lng: null});
-  // default post syntax
-  const [response] = useState({
-    'preferences': {},
-    'results': [],
-  });
 
   // TODO need to set default time
   const [Timer, setTimer] = useState(300);
 
   // genereate code for the session
   const [code, setCode] = useState(() => {
-    axios.post('sessions', response).then((response) => {
+    axios.get('sessions').then((response) => {
       // ensure you only do it once
-      // console.log(response.data);
-      setCode(response.data.truncCode);
+      setCode(response.data.sessionId);
     });
   });
 
@@ -42,7 +36,6 @@ function Preferences() {
     document.title = 'Choose game settings';
   }, []);
 
-  // TODO NEED TO FIX
   // Move this function to inside the master function by Aniket
   /**
    *
@@ -52,28 +45,27 @@ function Preferences() {
   }
 
   const postPreference = () => {
+    // change string to array form
+    // const formattedPrice = Price.split(',').map((x) => +x);
+
     const newPref = {
+      sessionId: code,
       location: Location,
       distance: Number(Distance),
       cuisines: Cuisines,
-      price: Number(Price),
+      price: Number(Price), // formattedPrice,
       timer: Timer,
       coordinates: Coordinates,
     };
 
-    // give correct json format
-    const give = {
-      preferences: newPref,
-    };
-
-    // console.log(newPref);
-    // console.log(give);
+    console.log(newPref);
+    // TODO coordinates need to be sent somewhere?
+    console.log(Coordinates);
 
     axios
-        .patch('../sessions/'+code, give)
+        .post('../preferences', newPref)
         .then((res) => {
           console.log(res.data);
-          handleSearch; // TODO NEED TO FIX FOR RESTAURANTS
         })
         .catch(function(error) {
           console.log(error);
@@ -166,7 +158,7 @@ function Preferences() {
             {/* need to check if an address is provided */}
             <button
               disabled={Coordinates.lat == null && Coordinates.lng == null}
-              onClick={postPreference} // , handleSearch } // TODO restaurants
+              onClick={postPreference, handleSearch}
               className={style.GoPrefButton}
             >
               Go
